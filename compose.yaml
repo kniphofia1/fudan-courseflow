@@ -1,3 +1,4 @@
+# Keep the deployment identity stable across the repository rename.
 name: fudan-course-nas
 
 services:

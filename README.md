@@ -1,4 +1,4 @@
-# Fudan Course NAS
+# Fudan CourseFlow · 复旦课流
 
 面向复旦 eLearning（Canvas）与 iCourse 的课程资料自动化工具，支持课件增量下载、录课转写和 AI 摘要，按学期与课程统一归档。
 
@@ -58,8 +58,8 @@ python3 --version
 以下命令在实际运行设备上执行。克隆后保持在仓库根目录：
 
 ```sh
-git clone https://github.com/kniphofia1/fudan-course-nas.git
-cd fudan-course-nas
+git clone https://github.com/kniphofia1/fudan-courseflow.git
+cd fudan-courseflow
 python3 scripts/init_local.py --semester 2026-fall --credentials
 mkdir -p downloads/2026-fall
 (cd downloads/2026-fall && pwd)
@@ -165,7 +165,7 @@ docker compose up -d icourse
 Canvas 计划任务执行以下命令，替换实际仓库路径：
 
 ```sh
-sh /absolute/path/to/fudan-course-nas/scripts/run-canvas.sh
+sh /absolute/path/to/fudan-courseflow/scripts/run-canvas.sh
 ```
 
 NAS 使用计划任务界面；Linux 可用 cron / systemd timer；macOS 可用 launchd；Windows 可用任务计划程序调用 WSL 中的脚本。任务环境需能找到 Docker、具备 Docker 权限，并使用正确的 WSL 发行版（如适用）。宿主机与容器时区保持 `Asia/Shanghai`。
