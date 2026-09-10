@@ -1,4 +1,4 @@
-# Fudan CourseFlow · 复旦课流
+# Fudan CourseFlow
 
 面向复旦 eLearning（Canvas）与 iCourse 的课程资料自动化工具，支持课件增量下载、录课转写和 AI 摘要，按学期与课程统一归档。
 
