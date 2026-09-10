@@ -269,4 +269,10 @@ python3 -m unittest discover -s tests -v
 
 感谢上游作者 [bnjmnt4n](https://github.com/bnjmnt4n/canvas-downloader)、[LeafCreeper](https://github.com/LeafCreeper/Fudan_iCourse_Subscriber)，以及 [SenseVoice](https://github.com/FunAudioLLM/SenseVoice)、[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)、[Silero VAD](https://github.com/snakers4/silero-vad) 项目。
 
-本项目非学校官方项目。来源仓库未提供明确的根 LICENSE，因此未添加统一许可证；公开可见不等于统一授予开源许可，复用与分发前请核实上游授权，依赖和模型遵循各自许可。
+本项目非学校官方项目。
+
+## 许可证
+
+本仓库由 kniphofia1 原创的整合与部署部分采用 [MIT License](LICENSE)，包括顶层 `scripts/`、`tests/`、`ci/`、`examples/` 及新编写的部署配置和文档。
+
+`canvas/` 与 `icourse/` 中继承的上游内容不在上述授权范围内。来源仓库在整理时未提供明确的根 LICENSE，本许可证不代表替上游作者重新授权；复用这些内容前需核实相应授权。第三方依赖和模型遵循各自许可证。
