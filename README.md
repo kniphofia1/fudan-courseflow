@@ -387,4 +387,4 @@ python3 -m unittest discover -s tests -v
 
 本仓库由 kniphofia1 原创的整合与部署部分采用 [MIT License](LICENSE)，包括顶层 `scripts/`、`tests/`、`ci/`、`examples/` 及新编写的部署配置和文档。
 
-`canvas/` 与 `icourse/` 中继承的上游内容不在上述授权范围内。来源仓库在整理时未提供明确的根 LICENSE，本许可证不代表替上游作者重新授权；复用这些内容前需核实相应授权。第三方依赖和模型遵循各自许可证。
+`canvas/` 与 `icourse/` 中继承的上游内容不在上述授权范围内。本许可证不代表替上游作者重新授权；复用这些内容前需核实相应授权。第三方依赖和模型遵循各自许可证。
