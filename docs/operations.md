@@ -1,5 +1,41 @@
 # 维护、排错与迁移
 
+## 学期与课程标识
+
+这三个值含义不同，不能互相替代：
+
+| 配置 | 获取方式 |
+|---|---|
+| `SEMESTER_KEY` | 自定义的本地目录标识，如 `2026-fall`；与初始化脚本参数一致 |
+| `CANVAS_TARGET_TERM_NAME` | 从 eLearning 课程列表的学期栏获取完整名称；Canvas 数字 Term ID 由程序识别 |
+| `ICOURSE_TERM_ID` | iCourse 课程列表请求中的 `term` 参数，需核对所选学期 |
+
+核验 iCourse 学期 ID：
+
+1. 在浏览器登录 iCourse，打开课程列表，并打开开发者工具的 Network（网络）面板。
+2. 切换到目标学期，筛选 `get-course-list` 请求。当前代码使用的接口路径为
+   `/portal/courseapi/v3/multi-search/get-course-list`。
+3. 读取该请求 Query String Parameters 中的 `term`，确认页面所选学期正确后填入 `.env`。
+   不要把浏览器 cookie、请求认证头或完整网络记录公开分享。若平台接口已变更，应重新核验，不能猜测 ID。
+
+私有确认名单中的 `icourse_id` 则取自课程详情页 URL 的 `course_id`；课程代码、名称、教师
+取自同一课程页面，名单的 `term_id` 须与 `.env` 一致。示例文件中的 ID 仅用于展示格式。
+
+## 首次配置与修改
+
+重新创建或构建服务前，应等待当前任务结束，避免中断正在处理的录课。
+
+- `.env` 中的输出路径应替换为真实、可写、专用于本学期的 NAS 目录；不要保留 `/absolute/path/...` 占位值。
+- UIS 凭据由初始化脚本写入 `secrets/fudan_username` 与 `secrets/fudan_password`，不用填写到 `.env`。
+- `.env` 使用 dotenv 格式，不是 shell 脚本。由 Compose 读取即可，不需要 `source .env`。
+- 重新运行初始化不会修改已有 `.env` 或凭据；换学期或更新密码时需要自行编辑相应文件。
+- 修改 `.env` 后运行 `docker compose up -d icourse`；修改程序或模型列表后运行
+  `docker compose up -d --build icourse`。仅执行 `restart` 不会重新读取配置或构建镜像。
+- 更新 secret 文件后，确认没有正在处理的任务，再执行 `docker compose up -d --force-recreate icourse`。
+  Canvas 每次启动新的临时容器，会读取当前配置和 secret。
+- `ICOURSE_RUN_TIMES` 控制录课调度时间，Canvas 的时间则在 NAS 计划任务中修改。
+- 恢复录课服务使用 `docker compose up -d icourse`；恢复 Canvas 需重新启用 NAS 计划任务。
+
 ## 持久化目录
 
 | 宿主机 | 容器内 | 内容 |
@@ -14,6 +50,12 @@
 所有路径均由仓库根目录解释。NAS 容器默认以 root 运行；运行后私有文件可能变成 root 所有，
 不要通过 `chmod -R 777` 解决。由管理员通过只读容器检查必要文件，或制定明确的用户映射策略。
 Syncthing 在宿主机需要读取输出目录，私有凭据目录则不应加入同步。
+
+Canvas 的运行日志位于 `.runtime/canvas/<SEMESTER_KEY>/sync.log`，每轮下载记录位于
+同目录下的 `log/`。iCourse 的常驻日志通过 `docker compose logs icourse` 查看。
+`run-icourse-once.sh` 使用临时容器，完成后删除容器，其输出需在执行终端查看。
+备份时至少保留学期数据库、配置与课程输出；SQLite 应在停写后备份或使用一致性备份方式。
+不要把整个 `.runtime/` 加入公开仓库或无访问控制的文件分享。
 
 ## 常见情况
 
