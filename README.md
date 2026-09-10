@@ -1,12 +1,25 @@
 # Fudan Course NAS
 
-面向复旦 eLearning（Canvas）与 iCourse 的 NAS 自动化工具，支持课件增量下载、录课转写和 AI 摘要，按学期与课程统一归档。
+面向复旦 eLearning（Canvas）与 iCourse 的课程资料自动化工具，支持课件增量下载、录课转写和 AI 摘要，按学期与课程统一归档。项目源自 NAS 部署，也提供普通电脑和 Linux 服务器的 Docker 使用说明。
+
+## 选择运行方式
+
+**NAS 不是必需条件。** 核心任务在 Linux 容器中运行，可根据设备选择：
+
+| 环境 | 运行方式 | 使用说明 |
+|---|---|---|
+| Linux NAS / Linux 服务器 | Docker Engine + Compose，适合常驻定时运行 | 下方部署流程 |
+| macOS | Docker Desktop，需要时手动运行 | [普通电脑使用指南](docs/desktop.md) |
+| Windows | Docker Desktop + WSL2，在 WSL 终端执行 | [普通电脑使用指南](docs/desktop.md) |
+| Linux 桌面 | Docker Engine + Compose，手动或定时运行 | [普通电脑使用指南](docs/desktop.md) |
+
+已完成 NAS 运行验证；桌面方案复用同一 Compose 配置，尚未完成各平台的端到端转写验证。普通电脑使用时需保持开机、联网且 Docker 正在运行，无需另配远程隧道或购买 NAS。
 
 ## 功能
 
 - **课件下载**：UIS 自动登录、短期 token 刷新、目标学期识别，保留课程文件夹结构。
 - **课程匹配**：基于课程代码、教学班、名称和教师匹配 iCourse 课程，跳过歧义及未开放录播。
-- **录课转写**：使用 SenseVoice Small INT8、sherpa-onnx 和 Silero VAD，在 NAS CPU 上进行中文主导的语音识别，保留英文术语。
+- **录课转写**：使用 SenseVoice Small INT8、sherpa-onnx 和 Silero VAD，在本机 CPU 上进行中文主导的语音识别，保留英文术语。
 - **资料归档**：流式处理音频，不保存音视频文件；输出完整转写与 AI 摘要 Markdown。
 - **定时运行**：支持互斥锁、失败重试、增量处理和独立学期进度。
 
@@ -22,13 +35,13 @@
         └── 2026-09-01_123456_课次标题.md
 ```
 
-可通过 Syncthing 将输出目录同步至电脑，需自行配置。
+在 NAS 或服务器部署时，可自行配置 Syncthing 将输出目录同步至电脑；直接在电脑运行时，文件写入本地目录，无需 Syncthing。
 
 ## 部署
 
-环境要求：Linux NAS、Git、Docker Engine、Docker Compose v2、Python 3，以及可访问目标课程的复旦 UIS 账号。无需 GPU；NAS 需能访问学校认证、课程平台、模型服务和依赖下载站点。
+环境要求：Git、Python 3、支持 Linux 容器的 Docker 环境、Compose v2，以及可访问目标课程的复旦 UIS 账号。无需 GPU；运行设备需能访问学校认证、课程平台、模型服务和依赖下载站点。
 
-以下命令均在 **NAS 终端**执行，操作账号需有 Docker 权限。克隆后保持在仓库根目录；本项目通过命令行和文件目录使用，不提供 Web 管理界面。
+以下为 Linux NAS / 服务器的常驻部署流程，命令在运行设备的终端执行，操作账号需有 Docker 权限。普通电脑可按 [手动运行流程](docs/desktop.md#手动运行) 操作。克隆后保持在仓库根目录；本项目通过命令行和文件目录使用，不提供 Web 管理界面。
 
 ```sh
 git clone https://github.com/kniphofia1/fudan-course-nas.git
@@ -68,11 +81,11 @@ Canvas 首次运行自动刷新 token；iCourse 首次启动下载 ASR 模型，
 
 ## 运行
 
-默认时区为 `Asia/Shanghai`，NAS 宿主机的计划任务时区也需保持一致。
+默认时区为 `Asia/Shanghai`，宿主机的计划任务时区也需保持一致。下表为常驻部署的安排；普通电脑无需配置定时，也可仅使用手动命令。
 
 | 任务 | 时间 | 调度方式 |
 |---|---|---|
-| eLearning | 07:00、19:00 | 在 NAS 计划任务中配置 |
+| eLearning | 07:00、19:00 | 在 NAS 计划任务或 Linux cron / systemd timer 中配置 |
 | iCourse | 13:00、22:00 | 容器内置调度 |
 
 NAS 计划任务入口（替换为实际仓库路径，任务账号需有 Docker 权限）：
@@ -120,6 +133,7 @@ CONFIRMED_COURSES_PATH=/app/data/confirmed-courses.json
 ## 文档
 
 - [部署维护与故障排查](docs/operations.md)
+- [普通电脑使用指南](docs/desktop.md)
 - [隐私与安全](SECURITY.md)
 - [源码来源、版本与测试记录](docs/provenance.md)
 - [GitHub Actions 测试模板（未启用）](ci/tests.yml.example)
