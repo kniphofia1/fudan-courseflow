@@ -1,0 +1,49 @@
+# Move to .github/workflows/tests.yml using a credential with workflow permission.
+name: Tests
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m unittest discover -s tests -v
+      - name: Validate Compose without real credentials
+        run: |
+          python scripts/init_local.py
+          touch secrets/fudan_username secrets/fudan_password
+          docker compose --profile manual config --quiet
+  canvas:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: canvas
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt
+      - run: cargo build --locked
+      - run: CANVAS_TEST_BINARY="$PWD/target/debug/canvas-downloader" python -m unittest discover -s tests -v
+  icourse:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: icourse
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt
+      - run: python -m unittest discover -s tests -v
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

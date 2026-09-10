@@ -1,0 +1,69 @@
+name: fudan-course-nas
+
+services:
+  canvas:
+    build: ./canvas
+    profiles: [manual]
+    working_dir: /data
+    entrypoint: [python, /opt/deploy/canvas_run.py]
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      FUDAN_USERNAME_FILE: /run/secrets/fudan_username
+      FUDAN_PASSWORD_FILE: /run/secrets/fudan_password
+      CANVAS_DOWNLOADER_AUTO_YES: "true"
+      CANVAS_TOKEN_PURPOSE: nas-canvas-downloader
+      CANVAS_TARGET_TERM_NAME: ${CANVAS_TARGET_TERM_NAME:?Set the exact Canvas term name}
+      CANVAS_COURSE_MANIFEST: /data/.state/semester-courses.json
+    volumes:
+      - ./.runtime/canvas/${SEMESTER_KEY:?Set SEMESTER_KEY}:/data
+      - ./scripts/canvas_run.py:/opt/deploy/canvas_run.py:ro
+      - ${COURSE_OUTPUT_DIR:?Set COURSE_OUTPUT_DIR}:/downloads
+    secrets: [fudan_username, fudan_password]
+    restart: "no"
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+
+  icourse:
+    build: ./icourse
+    env_file: .env
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      STUID_FILE: /run/secrets/fudan_username
+      UISPSW_FILE: /run/secrets/fudan_password
+      DATA_DIR: /app/data
+      DB_PATH: /app/data/icourse.db
+      RUN_LOCK_PATH: /app/data/.scheduler.lock
+      RUN_MODE: schedule
+      RUN_TIMES: ${ICOURSE_RUN_TIMES:-13:00,22:00}
+      RUN_ON_STARTUP: "false"
+      RUN_RETRIES: "3"
+      RETRY_DELAY_SECONDS: "60"
+      COURSE_DISCOVERY_MODE: manifest
+      ICOURSE_TERM_ID: ${ICOURSE_TERM_ID:?Set the verified iCourse term ID}
+      COURSE_MANIFEST_PATH: /app/canvas-state/semester-courses.json
+      COURSE_MAP_PATH: /app/data/course-map.json
+      EXPORT_DIR: /app/exports
+      MARKDOWN_EXPORT_ENABLED: "true"
+      EXPORT_TRANSCRIPT: "true"
+      EXPORT_USE_EXISTING_COURSE_DIRS: "true"
+      EXPORT_COURSE_SUBDIR: 录课转写
+      SENSEVOICE_LANGUAGE: ${SENSEVOICE_LANGUAGE:-zh}
+      SENSEVOICE_MODEL_DIR: /app/models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17
+      SILERO_VAD_PATH: /app/models/silero_vad.onnx
+    volumes:
+      - ./.runtime/icourse/${SEMESTER_KEY:?Set SEMESTER_KEY}:/app/data
+      - ./.runtime/models:/app/models
+      - ./.runtime/canvas/${SEMESTER_KEY:?Set SEMESTER_KEY}/.state:/app/canvas-state:ro
+      - ${COURSE_OUTPUT_DIR:?Set COURSE_OUTPUT_DIR}:/app/exports
+    secrets: [fudan_username, fudan_password]
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+
+secrets:
+  fudan_username:
+    file: ./secrets/fudan_username
+  fudan_password:
+    file: ./secrets/fudan_password

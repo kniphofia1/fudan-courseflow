@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+target
+.env*
+*.log
+*.toml.secret
+canvas-downloader.toml
+.state
+data
+tests

@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+.env*
+*.log
+*.db*
+*.enc
+data
+models
+exports
+tests

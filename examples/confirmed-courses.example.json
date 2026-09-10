@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "term_id": "27",
+  "courses": [
+    {
+      "icourse_id": "12345",
+      "course_code": "CS99999.01",
+      "name": "示例课程（请替换）",
+      "teachers": ["示例教师（请替换）"]
+    }
+  ]
+}
